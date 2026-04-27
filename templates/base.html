@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Минифотошоп</title>
+    <style>
+        /* Глобал стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e6e2e2;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Шапка */
+        .header {
+            background: #373737;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #5e5d5d;
+        }
+
+        .logo {
+            color: #faf8f8;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-area {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .user-name {
+            color: #cccaca;
+        }
+
+        .btn-header {
+            background: #535252;
+            color: #f6f2f2;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-header:hover {
+            background: #5e5c5c;
+        }
+
+        .main-container {
+            padding: 20px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Главная часть */
+        .editor {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Левая панель */
+        .left-panel {
+            width: 100px;
+            background: #e0e0e0;
+            border: 1px solid #aaa;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Стиль для кнопок слева */
+        .tool-link {
+            display: block;
+            width: 100%;
+            padding: 12px 0;
+            background: #ddd;
+            border: 1px solid #999;
+            text-align: center;
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+        }
+
+        /* Активная кнопка */
+        .tool-link.active {
+            background: #d68206;
+            border: 2px solid #333;
+        }
+
+        /* Рабочая зона */
+        .workspace {
+            flex: 1;
+            background: white;
+            border: 1px solid #aaa;
+            padding: 20px;
+            min-height: 650px;
+        }
+
+        .image-area {
+            background: #eee;
+            height: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #999;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: #a71010;
+        }
+
+        .file-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .file-btn {
+            background: #ddd;
+            border: 1px solid #999;
+            padding: 8px 20px;
+            cursor: pointer;
+        }
+
+        /* Меню */
+        .right-panel {
+            width: 320px;
+            background: #e0e0e0;
+            border: 1px solid #aaa;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-header {
+            background: #ccc;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #aaa;
+        }
+
+        .menu-content {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Стили для кнопок в меню */
+        .menu-btn {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            background: #ddd;
+            border: 1px solid #999;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        /* Слайдеры */
+        .slider-item {
+            margin: 15px 0;
+        }
+
+        .slider-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .value {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+        /* Чат */
+        .chat-messages {
+            height: 450px;
+            overflow-y: auto;
+            background: #f5f5f5;
+            border: 1px solid #aaa;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #ddd;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+            max-width: 90%;
+            font-size: 13px;
+        }
+
+        .message.ai .message-content {
+            background: #ff0000;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #aaa;
+        }
+
+        .chat-input-area button {
+            padding: 8px 15px;
+            background: #ddd;
+            border: 1px solid #999;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Шапка -->
+    <div class="header">
+        <div class="logo">Минифотошоп</div>
+        <div class="user-area">
+            <span class="user-name">Пользователь</span>
+            <a href="#" class="btn-header">Библиотека</a>
+            <a href="#" class="btn-header">Выйти</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="editor">
+
+            <!-- Левая панель -->
+            <div class="left-panel">
+                <a href="/filters" class="tool-link {% if active_menu == 'filters' %}active{% endif %}">Фильтры</a>
+                <a href="/transform" class="tool-link {% if active_menu == 'transform' %}active{% endif %}">Трансформ</a>
+                <a href="/correction" class="tool-link {% if active_menu == 'correction' %}active{% endif %}">Коррекция</a>
+                <a href="/ai" class="tool-link {% if active_menu == 'ai' %}active{% endif %}">AI</a>
+            </div>
+
+            <!-- Рабочая зона -->
+            <div class="workspace">
+                <div class="image-area">
+                    <div class="placeholder">
+                        Нет изображения<br>
+                    </div>
+                </div>
+                <div class="file-buttons">
+                    <button class="file-btn">Открыть файл</button>
+                    <button class="file-btn">Сохранить</button>
+                </div>
+            </div>
+
+            <!-- Меню -->
+            <div class="right-panel">
+
+                <!-- Заголовки меню -->
+                <div class="menu-header">
+                    {% if active_menu == 'filters' %}
+                        Фильтры
+                    {% elif active_menu == 'transform' %}
+                        Трансформация
+                    {% elif active_menu == 'correction' %}
+                        Коррекция
+                    {% elif active_menu == 'ai' %}
+                        AI Чат
+                    {% endif %}
+                </div>
+
+                <div class="menu-content">
+
+                    <!-- Фильтры -->
+                    {% if active_menu == 'filters' %}
+                    <div id="menu-filters">
+                        <button class="menu-btn">Черно-белый</button>
+                        <button class="menu-btn">Сепия</button>
+                        <button class="menu-btn">Инверсия</button>
+                        <button class="menu-btn">Размытие</button>
+                        <button class="menu-btn">Резкость</button>
+                        <button class="menu-btn">Зернистость</button>
+                        <button class="menu-btn">Золотой час</button>
+                        <button class="menu-btn">Теплота</button>
+                        <button class="menu-btn">Сброс фильтра</button>
+                    </div>
+                    {% endif %}
+
+                    <!-- Трансформации -->
+                    {% if active_menu == 'transform' %}
+                    <div id="menu-transform">
+                        <button class="menu-btn">-90</button>
+                        <button class="menu-btn">+90</button>
+                        <button class="menu-btn">Отразить по горизонтали</button>
+                        <button class="menu-btn">Отразить по вертикали</button>
+                        <button class="menu-btn">Сброс</button>
+                    </div>
+                    {% endif %}
+
+                    <!-- Коррекции -->
+                    {% if active_menu == 'correction' %}
+                    <div id="menu-correction">
+                        <div class="slider-item">
+                            <label>Яркость <span class="value">0%</span></label>
+                            <input type="range" min="-100" max="100" value="0">
+                        </div>
+                        <div class="slider-item">
+                            <label>Контраст <span class="value">0%</span></label>
+                            <input type="range" min="-100" max="100" value="0">
+                        </div>
+                        <div class="slider-item">
+                            <label>Насыщенность <span class="value">0%</span></label>
+                            <input type="range" min="-100" max="100" value="0">
+                        </div>
+                        <button class="menu-btn">Применить</button>
+                        <button class="menu-btn">Сбросить</button>
+                    </div>
+                    {% endif %}
+
+                    <!-- Чат -->
+                    {% if active_menu == 'ai' %}
+                    <div id="menu-ai">
+                        <!-- Поле для сообщений -->
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="message ai">
+                                <div class="message-content">
+                                    ИИ чат.
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Поле ввода -->
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Спросите что-нибудь...">
+                            <button id="send-btn">Отправить</button>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
