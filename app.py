@@ -1,37 +1,37 @@
 from flask import Flask, render_template
 
-
 app = Flask(__name__)
-
 
 @app.route('/')
 def index():
-    act_menu = 'filters'
-    return render_template('index.html', active_menu=act_menu)
-
+    return render_template('index.html', active_menu='filters')
 
 @app.route('/filters')
 def filters():
-    act_menu = 'filters'
-    return render_template('index.html', active_menu=act_menu)
-
+    return render_template('index.html', active_menu='filters')
 
 @app.route('/transform')
 def transform():
-    act_menu = 'transform'
-    return render_template('index.html', active_menu=act_menu)
-
+    return render_template('index.html', active_menu='transform')
 
 @app.route('/correction')
 def correction():
-    act_menu = 'correction'
-    return render_template('index.html', active_menu=act_menu)
-
+    return render_template('index.html', active_menu='correction')
 
 @app.route('/ai')
 def ai():
-    act_menu = 'ai'
-    return render_template('index.html', active_menu=act_menu)
+    return render_template('index.html', active_menu='ai')
 
+@app.route('/library')
+def library():
+    return render_template('library.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
 
 app.run(debug=True)
