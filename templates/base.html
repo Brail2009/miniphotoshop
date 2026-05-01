@@ -83,12 +83,12 @@
             font-weight: bold;
         }
 
-/* главное — ограничить размер картинки! */
+
         .logo-img {
-            height: 40px;           /* небольшая высота */
-            width: auto;            /* ширина сама пропорциональна */
-            max-width: 120px;       /* жёсткое ограничение */
-            object-fit: contain;    /* картинка не растягивается */
+            height: 40px;
+            width: auto;
+            max-width: 120px;
+            object-fit: contain;
         }
 
         .logo i {
@@ -179,6 +179,20 @@
             box-shadow: 0 0 0 4px rgba(81,156,171,0.2);
         }
 
+        /* Сообщения flash (уведомления) */
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            background: var(--accent);
+            color: var(--navbar);
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+        }
+
         /* ===== Адаптив ===== */
         @media (max-width: 768px) {
             .header { padding: 12px 16px; }
@@ -198,13 +212,29 @@
             Минифотошоп
         </a>
         <div class="user-area">
-            <span class="user-name"><i class="fa-regular fa-user"></i> Пользователь</span>
+            {% if current_user.is_authenticated %}
+                <span class="user-name"><i class="fa-regular fa-user"></i> {{ current_user.username }}</span>
+                <a href="/logout" class="btn-header"><i class="fa-solid fa-right-from-bracket"></i> Выйти</a>
+            {% else %}
+                <a href="/login" class="btn-header"><i class="fa-solid fa-arrow-right-to-bracket"></i> Войти</a>
+                <a href="/register" class="btn-header"><i class="fa-solid fa-user-plus"></i> Регистрация</a>
+            {% endif %}
             <a href="/library" class="btn-header"><i class="fa-regular fa-images"></i> Библиотека</a>
-            <a href="/login" class="btn-header"><i class="fa-solid fa-arrow-right-to-bracket"></i> Войти</a>
         </div>
     </div>
 
     <div class="main-container">
+        <!-- Блок для flash-сообщений (уведомления) -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 
