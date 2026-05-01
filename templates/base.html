@@ -4,106 +4,206 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Минифотошоп - {% block title %}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* Глобал стили */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ===== Палитра ===== */
+        :root {
+            --bg: #C3E7F1;            /* Light blue */
+            --panel: #519CAB;         /* Moonstone */
+            --accent: #FFC64F;        /* Saffron */
+            --navbar: #20373B;        /* Gunmetal */
+            --gray-100: #f3f5f7;
+            --gray-200: #e3e8ec;
+            --gray-300: #c8d1d6;
+            --gray-500: #6b7a80;
+            --gray-700: #3a484d;
+            --text: #1b2a2e;
+            --text-muted: #5b6a70;
+            --white: #ffffff;
+
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+
+            --shadow-sm: 0 4px 12px rgba(32, 55, 59, 0.08);
+            --shadow-md: 0 10px 30px rgba(32, 55, 59, 0.12);
+            --shadow-lg: 0 20px 50px rgba(32, 55, 59, 0.18);
+            --shadow-glow: 0 8px 24px rgba(255, 198, 79, 0.45);
+
+            --glass-bg: rgba(255, 255, 255, 0.35);
+            --glass-bg-strong: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.55);
+            --glass-blur: blur(18px) saturate(160%);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; }
 
         body {
-            background: #e6e2e2;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(1200px 600px at -10% -20%, rgba(255,198,79,0.25), transparent 60%),
+                radial-gradient(900px 500px at 110% 10%, rgba(81,156,171,0.45), transparent 60%),
+                radial-gradient(800px 600px at 50% 120%, rgba(81,156,171,0.35), transparent 60%),
+                var(--bg);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Шапка */
+        a { color: inherit; }
+
+        /* ===== Шапка ===== */
         .header {
-            background: #373737;
-            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: linear-gradient(135deg, rgba(32,55,59,0.92), rgba(32,55,59,0.78));
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 16px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #5e5d5d;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            box-shadow: var(--shadow-md);
         }
 
         .logo {
-            color: #faf8f8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
             font-size: 24px;
             font-weight: bold;
-            text-decoration: none;
         }
+
+/* главное — ограничить размер картинки! */
+        .logo-img {
+            height: 40px;           /* небольшая высота */
+            width: auto;            /* ширина сама пропорциональна */
+            max-width: 120px;       /* жёсткое ограничение */
+            object-fit: contain;    /* картинка не растягивается */
+        }
+
+        .logo i {
+            color: var(--accent);
+            filter: drop-shadow(0 4px 10px rgba(255,198,79,0.45));
+        }
+        .logo:hover { transform: translateY(-1px); }
 
         .user-area {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
         }
 
         .user-name {
-            color: #cccaca;
+            color: rgba(255,255,255,0.85);
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 999px;
         }
 
         .btn-header {
-            background: #535252;
-            color: #f6f2f2;
-            padding: 8px 16px;
-            border: none;
+            background: rgba(255,255,255,0.08);
+            color: var(--white);
+            padding: 10px 18px;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 12px;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all .25s ease;
         }
-
         .btn-header:hover {
-            background: #5e5c5c;
+            background: var(--accent);
+            color: var(--navbar);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
         }
 
         .main-container {
-            padding: 20px;
-            min-height: calc(100vh - 70px);
+            padding: 28px;
+            min-height: calc(100vh - 74px);
         }
 
-        /* Кнопки */
+        /* ===== Базовые кнопки/инпуты ===== */
         button, .btn {
-            background: #ddd;
-            border: 1px solid #999;
-            padding: 8px 20px;
+            background: var(--gray-200);
+            border: 1px solid var(--gray-300);
+            padding: 10px 20px;
             cursor: pointer;
             font-family: inherit;
+            font-weight: 600;
+            color: var(--text);
+            border-radius: 12px;
+            transition: all .2s ease;
         }
-
         button:hover, .btn:hover {
-            background: #ccc;
+            background: var(--white);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
         }
 
-        /* Формы */
         input, textarea {
-            background: #f5f5f5;
-            border: 1px solid #aaa;
-            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.8);
+            padding: 12px 14px;
             font-family: inherit;
+            border-radius: 12px;
+            color: var(--text);
+            transition: all .2s ease;
+        }
+        input::placeholder, textarea::placeholder { color: var(--text-muted); }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--panel);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(81,156,171,0.2);
         }
 
-        input:focus {
-            outline: none;
-            border-color: #666;
+        /* ===== Адаптив ===== */
+        @media (max-width: 768px) {
+            .header { padding: 12px 16px; }
+            .logo { font-size: 18px; }
+            .user-name { display: none; }
+            .btn-header { padding: 8px 12px; font-size: 13px; }
+            .main-container { padding: 16px; }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-    <!-- Шапка -->
     <div class="header">
-        <a href="/" class="logo">Минифотошоп</a>
+        <a href="/" class="logo">
+            <img src="/static/logo.PNG" alt="Минифотошоп" class="logo-img">
+            Минифотошоп
+        </a>
         <div class="user-area">
-            <span class="user-name">Пользователь</span>
-            <a href="/library" class="btn-header">Библиотека</a>
-            <a href="/login" class="btn-header">Войти</a>
+            <span class="user-name"><i class="fa-regular fa-user"></i> Пользователь</span>
+            <a href="/library" class="btn-header"><i class="fa-regular fa-images"></i> Библиотека</a>
+            <a href="/login" class="btn-header"><i class="fa-solid fa-arrow-right-to-bracket"></i> Войти</a>
         </div>
     </div>
 
-    <!-- Основ -->
     <div class="main-container">
         {% block content %}{% endblock %}
     </div>

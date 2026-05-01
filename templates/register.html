@@ -4,75 +4,115 @@
 
 {% block extra_css %}
 <style>
-    /* Стили */
     .register-container {
-        max-width: 400px;
-        margin: 50px auto;
-        background: #e0e0e0;
-        border: 1px solid #aaa;
-        padding: 30px;
+        max-width: 440px;
+        margin: 60px auto;
+        background: var(--glass-bg-strong);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--glass-border);
+        padding: 40px 36px;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+    .register-container::before {
+        content: "";
+        position: absolute;
+        top: -80px; left: -80px;
+        width: 200px; height: 200px;
+        background: radial-gradient(circle, rgba(81,156,171,0.45), transparent 70%);
+        pointer-events: none;
+    }
+
+    .register-icon {
+        width: 64px; height: 64px;
+        margin: 0 auto 16px;
+        background: linear-gradient(135deg, var(--panel), #3f8492);
+        color: var(--white);
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 18px;
+        font-size: 24px;
+        box-shadow: var(--shadow-md);
     }
 
     .register-container h2 {
         text-align: center;
-        margin-bottom: 25px;
-        color: #333;
-        font-weight: normal;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-weight: 700;
+        font-size: 26px;
+        letter-spacing: -0.02em;
+    }
+    .register-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-bottom: 28px;
     }
 
-    .form-group {
-        margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 18px; }
 
     .form-group label {
         display: block;
         margin-bottom: 8px;
-        font-weight: bold;
-        color: #333;
+        font-weight: 600;
+        color: var(--text);
+        font-size: 14px;
     }
 
     .form-group input {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #aaa;
-        background: #f5f5f5;
+        padding: 13px 16px;
     }
 
     .register-btn {
         width: 100%;
-        padding: 12px;
-        background: #888;
-        color: white;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--accent), #ffb627);
+        color: var(--navbar);
         border: none;
         cursor: pointer;
         font-size: 16px;
+        font-weight: 700;
+        border-radius: 12px;
+        margin-top: 8px;
+        box-shadow: var(--shadow-glow);
+        transition: all .25s ease;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     }
-
     .register-btn:hover {
-        background: #666;
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #ffb627, var(--accent));
     }
 
     .login-link {
         text-align: center;
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px solid #aaa;
+        margin-top: 22px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.6);
+        color: var(--text-muted);
+        font-size: 14px;
     }
-
     .login-link a {
-        color: #333;
+        color: var(--panel);
         text-decoration: none;
+        font-weight: 700;
     }
+    .login-link a:hover { text-decoration: underline; }
 
-    .login-link a:hover {
-        text-decoration: underline;
+    @media (max-width: 480px) {
+        .register-container { margin: 30px 0; padding: 28px 22px; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="register-container">
+    <div class="register-icon"><i class="fa-solid fa-user-plus"></i></div>
     <h2>Регистрация</h2>
+    <p class="register-subtitle">Создайте аккаунт за несколько секунд</p>
 
     <form method="POST" action="/register">
         <div class="form-group">
@@ -83,7 +123,9 @@
             <label>Пароль</label>
             <input type="password" name="password" placeholder="Пароль" required>
         </div>
-        <button type="submit" class="register-btn">Зарегистрироваться</button>
+        <button type="submit" class="register-btn">
+            <i class="fa-solid fa-user-plus"></i> Зарегистрироваться
+        </button>
     </form>
 
     <div class="login-link">
