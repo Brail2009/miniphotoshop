@@ -10,7 +10,7 @@
         gap: 20px;
     }
 
-    /* ===== Стеклянная панель (общий стиль) ===== */
+    /* ===== Стеклянная панель ===== */
     .glass {
         background: var(--glass-bg);
         backdrop-filter: var(--glass-blur);
@@ -38,26 +38,26 @@
     }
 
     .tool-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    margin: 8px 0;
-    padding: 12px 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 24px;
-    font-weight: 500;
-    font-size: 11px;
-    text-align: center;
-    text-decoration: none;
-    color: var(--text);
-    transition: all .2s ease;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-}
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        margin: 8px 0;
+        padding: 12px 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        font-weight: 500;
+        font-size: 11px;
+        text-align: center;
+        text-decoration: none;
+        color: var(--text);
+        transition: all .2s ease;
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
     .tool-link i { font-size: 18px; color: var(--panel); transition: color .25s; }
 
     .tool-link:hover {
@@ -91,22 +91,35 @@
 
     .image-area {
         flex: 1;
-        background:
-            linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));
-        min-height: 540px;
+        min-height: 400px;
+        max-height: 600px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));
         display: flex;
         align-items: center;
         justify-content: center;
         border: 2px dashed rgba(81,156,171,0.45);
         border-radius: var(--radius-md);
         position: relative;
-        overflow: hidden;
+        overflow: auto;
     }
+
     .image-area::before {
         content: "";
-        position: absolute; inset: 0;
+        position: absolute;
+        inset: 0;
         background: radial-gradient(circle at 50% 50%, rgba(255,198,79,0.12), transparent 60%);
         pointer-events: none;
+    }
+
+    .preview-image {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 12px;
+        display: block;
+        margin: 0 auto;
     }
 
     .placeholder {
@@ -120,6 +133,14 @@
         opacity: 0.6;
         margin-bottom: 12px;
         display: block;
+    }
+
+    /* Стиль для отображаемого изображения */
+    .preview-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
     }
 
     .file-buttons {
@@ -140,6 +161,8 @@
         align-items: center;
         gap: 8px;
         box-shadow: var(--shadow-sm);
+        cursor: pointer;
+        text-decoration: none;
     }
     .file-btn:hover {
         background: linear-gradient(135deg, var(--accent), #ffb627);
@@ -337,21 +360,13 @@
     .send-button:active { transform: scale(0.97); }
 
     .liquid-glass-card {
-  /* Semi-transparent background */
           background: rgba(255, 255, 255, 0.05);
-
-  /* The core glass effect */
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
-
-  /* Simulating the "rim" of liquid glass */
           border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 24px;
-
-  /* Specular highlight for depth */
           box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
         }
-
 
     /* ===== Адаптив ===== */
     @media (max-width: 1024px) {
@@ -401,19 +416,27 @@
     <!-- Центральная часть -->
     <div class="workspace">
         <div class="image-area">
-            <div class="placeholder">
-                <i class="fa-regular fa-image"></i>
-                Нет изображения<br>
-                <small>Откройте файл, чтобы начать редактирование</small>
-            </div>
+            {% if current_image %}
+                <img src="{{ url_for('uploaded_file', filename=current_image.split('/')[-1]) }}" class="preview-image" alt="Редактируемое изображение">
+            {% else %}
+                <div class="placeholder">
+                    <i class="fa-regular fa-image"></i>
+                    Нет изображения<br>
+                    <small>Нажмите «Открыть файл», чтобы загрузить фото</small>
+                </div>
+            {% endif %}
         </div>
         <div class="file-buttons">
-            <button class="file-btn"><i class="fa-solid fa-paperclip"></i> Открыть файл</button>
-            <button class="file-btn"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button>
+            <form action="/upload" method="post" enctype="multipart/form-data" style="display: inline;">
+                <label class="file-btn" style="cursor: pointer;">
+                    <i class="fa-solid fa-paperclip"></i> Открыть файл
+                    <input type="file" name="file" accept="image/png, image/jpeg, image/jpg, image/gif, image/bmp" style="display: none;" onchange="this.form.submit()">
+                </label>
+            </form>
+            <a href="/save" class="file-btn"><i class="fa-solid fa-floppy-disk"></i> Сохранить</a>
         </div>
     </div>
 
-    <!-- Меню -->
     <div class="right-panel">
         <div class="menu-header">
             {% if active_menu == 'filters' %}
