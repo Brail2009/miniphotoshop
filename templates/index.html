@@ -135,14 +135,6 @@
         display: block;
     }
 
-    /* Стиль для отображаемого изображения */
-    .preview-image {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        border-radius: 12px;
-    }
-
     .file-buttons {
         margin-top: 20px;
         display: flex;
@@ -218,6 +210,9 @@
         transition: all .2s ease;
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
+        /* Убираем стандартный вид кнопки */
+        font-family: inherit;
+        font-size: inherit;
     }
     .menu-btn::before {
         content: "";
@@ -437,16 +432,13 @@
         </div>
     </div>
 
+    <!-- Правая панель -->
     <div class="right-panel">
         <div class="menu-header">
-            {% if active_menu == 'filters' %}
-                Фильтры
-            {% elif active_menu == 'transform' %}
-                Трансформация
-            {% elif active_menu == 'correction' %}
-                Коррекция
-            {% elif active_menu == 'ai' %}
-                AI Чат
+            {% if active_menu == 'filters' %}Фильтры
+            {% elif active_menu == 'transform' %}Трансформация
+            {% elif active_menu == 'correction' %}Коррекция
+            {% elif active_menu == 'ai' %}AI Чат
             {% endif %}
         </div>
 
@@ -454,46 +446,106 @@
             <!-- Фильтры -->
             {% if active_menu == 'filters' %}
             <div>
-                <button class="menu-btn">Черно-белый</button>
-                <button class="menu-btn">Сепия</button>
-                <button class="menu-btn">Инверсия</button>
-                <button class="menu-btn">Размытие</button>
-                <button class="menu-btn">Резкость</button>
-                <button class="menu-btn">Зернистость</button>
-                <button class="menu-btn">Золотой час</button>
-                <button class="menu-btn">Теплота</button>
-                <button class="menu-btn">Сброс фильтра</button>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="filter_name" value="grayscale">
+                    <button type="submit" class="menu-btn">Черно-белый</button>
+                </form>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="filter_name" value="sepia">
+                    <button type="submit" class="menu-btn">Сепия</button>
+                </form>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="filter_name" value="invert">
+                    <button type="submit" class="menu-btn">Инверсия</button>
+                </form>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="filter_name" value="blur">
+                    <button type="submit" class="menu-btn">Размытие</button>
+                </form>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="filter_name" value="sharpen">
+                    <button type="submit" class="menu-btn">Резкость</button>
+                </form>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="filter_name" value="edges">
+                    <button type="submit" class="menu-btn">Выделение границ</button>
+                </form>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="filter_name" value="emboss">
+                    <button type="submit" class="menu-btn">Тиснение</button>
+                </form>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="filter_name" value="cartoon">
+                    <button type="submit" class="menu-btn">Мультфильм</button>
+                </form>
+                <form method="post" action="/filters">
+                    <input type="hidden" name="action" value="reset">
+                    <button type="submit" class="menu-btn">Сброс фильтра</button>
+                </form>
             </div>
             {% endif %}
 
             <!-- Трансформация -->
             {% if active_menu == 'transform' %}
             <div>
-                <button class="menu-btn">-90°</button>
-                <button class="menu-btn">+90°</button>
-                <button class="menu-btn">Отразить по горизонтали</button>
-                <button class="menu-btn">Отразить по вертикали</button>
-                <button class="menu-btn">Сброс</button>
+                <form method="post" action="/transform">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="transform_type" value="rotate_90_ccw">
+                    <button type="submit" class="menu-btn">-90°</button>
+                </form>
+                <form method="post" action="/transform">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="transform_type" value="rotate_90_cw">
+                    <button type="submit" class="menu-btn">+90°</button>
+                </form>
+                <form method="post" action="/transform">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="transform_type" value="flip_horizontal">
+                    <button type="submit" class="menu-btn">Отразить по горизонтали</button>
+                </form>
+                <form method="post" action="/transform">
+                    <input type="hidden" name="action" value="apply">
+                    <input type="hidden" name="transform_type" value="flip_vertical">
+                    <button type="submit" class="menu-btn">Отразить по вертикали</button>
+                </form>
+                <form method="post" action="/transform">
+                    <input type="hidden" name="action" value="reset">
+                    <button type="submit" class="menu-btn">Сброс</button>
+                </form>
             </div>
             {% endif %}
 
             <!-- Коррекция -->
             {% if active_menu == 'correction' %}
             <div>
-                <div class="slider-item">
-                    <label>Яркость <span class="value">0%</span></label>
-                    <input type="range" min="-100" max="100" value="0">
-                </div>
-                <div class="slider-item">
-                    <label>Контраст <span class="value">0%</span></label>
-                    <input type="range" min="-100" max="100" value="0">
-                </div>
-                <div class="slider-item">
-                    <label>Насыщенность <span class="value">0%</span></label>
-                    <input type="range" min="-100" max="100" value="0">
-                </div>
-                <button class="menu-btn">Применить</button>
-                <button class="menu-btn">Сбросить</button>
+                <form method="post" action="/correction">
+                    <input type="hidden" name="action" value="apply">
+                    <div class="slider-item">
+                        <label>Яркость <span class="value">{{ sliders.brightness }}%</span></label>
+                        <input type="range" name="brightness" min="-100" max="100" value="{{ sliders.brightness }}">
+                    </div>
+                    <div class="slider-item">
+                        <label>Контраст <span class="value">{{ sliders.contrast }}%</span></label>
+                        <input type="range" name="contrast" min="-100" max="100" value="{{ sliders.contrast }}">
+                    </div>
+                    <div class="slider-item">
+                        <label>Насыщенность <span class="value">{{ sliders.saturation }}%</span></label>
+                        <input type="range" name="saturation" min="-100" max="100" value="{{ sliders.saturation }}">
+                    </div>
+                    <button type="submit" class="menu-btn">Применить</button>
+                </form>
+                <form method="post" action="/correction">
+                    <input type="hidden" name="action" value="reset">
+                    <button type="submit" class="menu-btn">Сбросить</button>
+                </form>
             </div>
             {% endif %}
 
