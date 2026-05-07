@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
@@ -15,9 +16,11 @@ app.config['SECRET_KEY'] = ':)'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///miniphoto.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['USER_PHOTOS_FOLDER'] = 'user_photos'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['USER_PHOTOS_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -34,6 +37,16 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+# Фото
+class Photo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    filename = db.Column(db.String(200), nullable=False)      # имя
+    filepath = db.Column(db.String(300), nullable=False)     # путь
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('photos'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -231,11 +244,6 @@ def ai():
     current_image = session.get('current_image')
     return render_template('index.html', active_menu='ai', current_image=current_image)
 
-@app.route('/library')
-@login_required
-def library():
-    return render_template('library.html')
-
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload():
@@ -331,5 +339,62 @@ def logout():
     session.pop('current_image', None)
     flash('Вы вышли из аккаунта')
     return redirect(url_for('login'))
+
+@app.route('/save_to_library', methods=['POST'])
+@login_required
+def save_to_library():
+    curr_path = session.get('current_image')
+    if not curr_path or not os.path.exists(curr_path):
+        flash('Нет изображения для сохранения')
+        return redirect(url_for('index'))
+
+    # Уникальное имя для копии
+    ext = os.path.splitext(curr_path)[1]
+    un_name = f"{current_user.id}_{uuid.uuid4().hex}{ext}"
+    dest_path = os.path.join(app.config['USER_PHOTOS_FOLDER'], un_name)
+
+    # Копируем
+    import shutil
+    shutil.copy2(curr_path, dest_path)
+
+    # Сохраняем в БД
+    orig_name = os.path.basename(curr_path)
+    photo = Photo(
+        user_id=current_user.id,
+        filename=orig_name,
+        filepath=dest_path
+    )
+    db.session.add(photo)
+    db.session.commit()
+
+    flash('Изображение сохранено в библиотеку')
+    return redirect(url_for('index'))
+
+@app.route('/library')
+@login_required
+def library():
+    photos = Photo.query.filter_by(user_id=current_user.id).order_by(Photo.created_at.desc()).all()
+    return render_template('library.html', photos=photos)
+
+@app.route('/delete_from_library/<int:photo_id>', methods=['POST'])
+@login_required
+def delete_from_library(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    if photo.user_id != current_user.id:
+        flash('Доступ закрыт')
+        return redirect(url_for('library'))
+
+    if os.path.exists(photo.filepath):
+        os.remove(photo.filepath)
+
+    db.session.delete(photo)
+    db.session.commit()
+    flash('Фото удалено из библиотеки')
+    return redirect(url_for('library'))
+
+@app.route('/user_photos/<path:filename>')
+@login_required
+def user_photo_file(filename):
+    return send_file(os.path.join(app.config['USER_PHOTOS_FOLDER'], filename))
 
 app.run(debug=True)
