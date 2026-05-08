@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Yandex.RTB -->
+    <script>window.yaContextCb=window.yaContextCb||[]</script>
+    <script src="https://yandex.ru/ads/system/context.js" async></script>
     <style>
         /* ===== Палитра ===== */
         :root {
@@ -237,6 +240,15 @@
 
         {% block content %}{% endblock %}
     </div>
-
+    <!-- Yandex.RTB R-A-19242937-1 -->
+    <script>
+    window.yaContextCb.push(() => {
+        Ya.Context.AdvManager.render({
+            "blockId": "R-A-19242937-1",
+            "type": "fullscreen",
+            "platform": "desktop"
+        })
+    })
+    </script>
 </body>
 </html>
