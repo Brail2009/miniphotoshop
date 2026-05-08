@@ -397,4 +397,6 @@ def delete_from_library(photo_id):
 def user_photo_file(filename):
     return send_file(os.path.join(app.config['USER_PHOTOS_FOLDER'], filename))
 
-app.run(debug=True)
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
