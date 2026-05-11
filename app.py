@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import uuid
 import random
+import requests
 
 from image_work import apply_filter, apply_transform, apply_correction, save_bgr_im
 
@@ -42,8 +43,8 @@ class User(UserMixin, db.Model):
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    filename = db.Column(db.String(200), nullable=False)      # имя
-    filepath = db.Column(db.String(300), nullable=False)     # путь
+    filename = db.Column(db.String(200), nullable=False)  # имя
+    filepath = db.Column(db.String(300), nullable=False)  # путь
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref=db.backref('photos'))
@@ -67,6 +68,61 @@ def s_and_up(image_bgr, original_path=None):
     path = save_bgr_im(image_bgr, app.config['UPLOAD_FOLDER'], original_path)
     session['current_image'] = path
     return url_for('uploaded_file', filename=os.path.basename(path))
+
+# Ии функции
+def ask_pollinations(prompt):
+    url = "https://text.pollinations.ai/v1/chat/completions"
+    payload = {
+        "model": "openai",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7,
+        "max_tokens": 500
+    }
+    headers = {"Content-Type": "application/json"}
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"]
+        else:
+            print(f"Ошибка {response.status_code}: {response.text}")
+            return None
+    except Exception as e:
+        print(e)
+        return None
+
+
+def parse_ai_response(user_message):
+    system_prompt = f"""
+Ты ии помощник в фоторедакторе. Тебе нужно вернуть ТОЛЬКО JSON, без пояснений.
+
+Доступные действия:
+- filter: grayscale, sepia, invert, blur, sharpen, edges, emboss, cartoon
+- transform: rotate_90_cw, rotate_90_ccw, flip_horizontal, flip_vertical  
+- correction: brightness (от -100 до 100), contrast (от -100 до 100), saturation (от -100 до 100)
+- advice: дать совет
+- reply: обычный ответ
+
+Форматы ответа (строго JSON):
+{{"action": "filter", "action_type": "grayscale", "message": "Применяю ч/б фильтр"}}
+{{"action": "transform", "action_type": "rotate_90_cw", "message": "Поворачиваю вправо"}}
+{{"action": "correction", "brightness": 30, "contrast": 0, "saturation": 0, "message": "Увеличиваю яркость"}}
+{{"action": "advice", "message": "Попробуйте увеличить контраст"}}
+{{"action": "reply", "message": "Привет! Я AI-помощник"}}
+
+Команда пользователя: "{user_message}"
+Ответь ТОЛЬКО JSON.
+"""
+    ai_resp = ask_pollinations(system_prompt)
+    if ai_resp:
+        try:
+            start = ai_resp.find('{')
+            end = ai_resp.rfind('}') + 1
+            if start != -1 and end != -1:
+                return json.loads(ai_resp[start:end])
+        except:
+            pass
+    return {"action": "reply",
+            "message": "Скорее всего ИИ сейчас недоступен. Попробуйте позже"}
 
 # Маршруты
 @app.route('/')
@@ -238,11 +294,76 @@ def correction_page():
     }
     return render_template('index.html', active_menu='correction', current_image=current_image, sliders=sliders)
 
-@app.route('/ai')
+@app.route('/ai', methods=['GET', 'POST'])
 @login_required
 def ai():
     current_image = session.get('current_image')
-    return render_template('index.html', active_menu='ai', current_image=current_image)
+
+    if request.method == 'POST':
+        user_message = request.form.get('message', '').strip()
+        if not user_message:
+            flash('Введите сообщение')
+            return redirect(url_for('ai'))
+
+        command = parse_ai_response(user_message)
+        response_message = command.get('message', '')
+
+        # Применяем
+        if current_image and command.get('action') == 'filter':
+            try:
+                pre = session.get('pre_filter_image')
+                if not pre or not os.path.exists(pre):
+                    session['pre_filter_image'] = current_image
+                result = apply_filter(current_image, command['action_type'])
+                s_and_up(result, current_image)
+            except Exception as e:
+                response_message = f"Ошибка: {e}"
+
+        elif current_image and command.get('action') == 'transform':
+            try:
+                pre = session.get('pre_transform_image')
+                if not pre or not os.path.exists(pre):
+                    session['pre_transform_image'] = current_image
+                result = apply_transform(current_image, command['action_type'])
+                s_and_up(result, current_image)
+            except Exception as e:
+                response_message = f"Ошибка: {e}"
+
+        elif current_image and command.get('action') == 'correction':
+            try:
+                pre = session.get('pre_correction_image')
+                if not pre or not os.path.exists(pre):
+                    session['pre_correction_image'] = current_image
+                result = apply_correction(
+                    current_image,
+                    command.get('brightness', 0),
+                    command.get('contrast', 0),
+                    command.get('saturation', 0)
+                )
+                s_and_up(result, current_image)
+                if command.get('brightness', 0) != 0:
+                    session['last_brightness'] = command.get('brightness', 0)
+                if command.get('contrast', 0) != 0:
+                    session['last_contrast'] = command.get('contrast', 0)
+                if command.get('saturation', 0) != 0:
+                    session['last_saturation'] = command.get('saturation', 0)
+            except Exception as e:
+                response_message = f"Ошибка: {e}"
+
+        chat_history = session.get('chat_history', [])
+        chat_history.append({'user': user_message, 'ai': response_message})
+        if len(chat_history) > 10:
+            chat_history = chat_history[-10:]
+        session['chat_history'] = chat_history
+
+        return redirect(url_for('ai'))
+
+    # GET-запрос
+    return render_template('index.html', active_menu='ai', current_image=current_image, sliders={
+        'brightness': session.get('last_brightness', 0),
+        'contrast': session.get('last_contrast', 0),
+        'saturation': session.get('last_saturation', 0)
+    })
 
 @app.route('/upload', methods=['POST'])
 @login_required
@@ -273,6 +394,7 @@ def upload():
     session.pop('last_brightness', None)
     session.pop('last_contrast', None)
     session.pop('last_saturation', None)
+    session.pop('chat_history', None)
 
     flash('Изображение загружено')
     return redirect(url_for('index'))
