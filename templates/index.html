@@ -440,7 +440,7 @@
             </form>
             <a href="/save" class="file-btn"><i class="fa-solid fa-floppy-disk"></i> Сохранить</a>
             <form action="/save_to_library" method="post" style="display: inline;">
-                <button type="submit" class="file-btn" style="background: linear-gradient(135deg, var(--accent), #ffb627); color: var(--navbar);">
+                <button type="submit" class="file-btn" style="display: inline;">
                     <i class="fa-solid fa-bookmark"></i> В библиотеку
                 </button>
             </form>
@@ -507,7 +507,7 @@
                         <div class="message ai"><div class="message-content">{{ msg.ai }}</div></div>
                     {% else %}
                         <div class="message ai">
-                            <div class="message-content">Это ИИ помощник. Напишите, например: "черно-белый", "поверни вправо", "увеличь яркость на 30%", "совет".</div>
+                            <div class="message-content">Это ИИ помощник. Напишите, например: "черно-белый", "поверни вправо", "увеличь яркость на 30%", "совет", "api"</div>
                         </div>
                     {% endfor %}
                 </div>

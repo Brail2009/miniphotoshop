@@ -56,7 +56,7 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
-# ---------- Вспомогательные ----------
+# Вспомагательные
 def get_curr_im():
     img = session.get('current_image')
     if not img or not os.path.exists(img):
@@ -101,6 +101,7 @@ def parse_ai_response(user_message):
 - correction: brightness (от -100 до 100), contrast (от -100 до 100), saturation (от -100 до 100)
 - advice: дать совет
 - reply: обычный ответ
+- api: расскажи про api
 
 Форматы ответа (строго JSON):
 {{"action": "filter", "action_type": "grayscale", "message": "Применяю ч/б фильтр"}}
@@ -108,6 +109,8 @@ def parse_ai_response(user_message):
 {{"action": "correction", "brightness": 30, "contrast": 0, "saturation": 0, "message": "Увеличиваю яркость"}}
 {{"action": "advice", "message": "Попробуйте увеличить контраст"}}
 {{"action": "reply", "message": "Привет! Я AI-помощник"}}
+{{"action": "api", "message": "http://127.0.0.1:5000
+/api/current_image - узнать информацию о текущем изображении"}}
 
 Команда пользователя: "{user_message}"
 Ответь ТОЛЬКО JSON.
@@ -518,6 +521,18 @@ def delete_from_library(photo_id):
 @login_required
 def user_photo_file(filename):
     return send_file(os.path.join(app.config['USER_PHOTOS_FOLDER'], filename))
+
+@app.route('/api/current_image', methods=['GET'])
+@login_required
+def api_current_image():
+    current_image = session.get('current_image')
+    if not current_image or not os.path.exists(current_image):
+        return jsonify({'error': 'Нет изображения'}), 404
+    return jsonify({
+        'path': current_image,
+        'filename': os.path.basename(current_image),
+        'url': url_for('uploaded_file', filename=os.path.basename(current_image))
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
